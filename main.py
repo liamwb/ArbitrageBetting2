@@ -16,25 +16,27 @@ arbitrageObjects = []
 # Some classes and functions are from the original ArbitrageBetting project, with some changes to better suit
 # the API we're using
 class Game:
-    def __init__(self, bettingAgency, teamA, teamB, oddsA, oddsB, ):
+    def __init__(self, bettingAgency, teamA, teamB, oddsA, oddsB, sport):
         self.bettingAgency = bettingAgency
         self.teamA = teamA
         self.teamB = teamB
         self.oddsA = oddsA
         self.oddsB = oddsB
+        self.sport = sport
         self.impliedOddsA = 1 / oddsA
         self.impliedOddsB = 1 / oddsB
         self.gameID = teamA + ' vs ' + teamB
 
 
 class PossibleArbitrage:
-    def __init__(self, teamA, teamB, oddsA, oddsB, agencyA, agencyB):
+    def __init__(self, teamA, teamB, oddsA, oddsB, agencyA, agencyB, sport):
         self.teamA = teamA
         self.teamB = teamB
         self.oddsA = oddsA
         self.oddsB = oddsB
         self.agencyA = agencyA
         self.agencyB = agencyB
+        self.sport = sport
         self.gameID = teamA + ' vs ' + teamB
         self.CMM = combinedMarketMargin(oddsA, oddsB)
 
@@ -93,7 +95,8 @@ for game in odds_json['data']:
     for site in game['sites']:
         bettingAgency = site['site_key']
         oddsA, oddsB = site['odds']['h2h']
-        gameObjects.append(Game(bettingAgency=bettingAgency, teamA=teamA, teamB=teamB, oddsA=oddsA, oddsB=oddsB))
+        gameObjects.append(Game(bettingAgency=bettingAgency, teamA=teamA, teamB=teamB, oddsA=oddsA, oddsB=oddsB,
+                                sport=sport_key))
 # gameObjects now has an object for each set of odds for each game in it
 
 
@@ -106,7 +109,8 @@ for ID in gameIDs:
         for game2 in relevant_games:
             arbitrageObjects.append(PossibleArbitrage(teamA=game1.teamA, teamB=game2.teamB,
                                                       oddsA=game1.oddsA, oddsB=game2.oddsB,
-                                                      agencyA=game1.bettingAgency, agencyB=game2.bettingAgency))
+                                                      agencyA=game1.bettingAgency, agencyB=game2.bettingAgency,
+                                                      sport=game1.sport))
 
 # sort for the best arbitrage opportunities
 arbitrageObjects.sort(key=lambda x: x.CMM)
@@ -116,7 +120,7 @@ for arbitrage_object in arbitrageObjects:
     implied_oddsA = 1 / arbitrage_object.oddsA
     implied_oddsB = 1 / arbitrage_object.oddsB
     CMM = arbitrage_object.CMM
-    print('For ' + arbitrage_object.gameID +
+    print('For ' + arbitrage_object.gameID + ' (' + arbitrage_object.sport + ')' +
           '\na CMM of ' + str(arbitrage_object.CMM) +
           '\ncan be achieved through ' + arbitrage_object.agencyA + ' and ' + arbitrage_object.agencyB + '.' +
           '(' + str(arbitrage_object.oddsA) + ' to ' + str(arbitrage_object.oddsB) + ')' +
