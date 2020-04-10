@@ -7,6 +7,10 @@ websites for odds, I will be using the-odds-api, which will get lots of odds fro
 import json
 import requests
 
+# Keep the key for the-odds-api key secret
+api_key = open('api_key.txt').read()
+gameObjects = []
+
 
 # These classes and functions are from the original ArbitrageBetting project, with some changes to better suit
 # the API we're using
@@ -42,15 +46,20 @@ def profit(investment, combinedMarketMargin):
 def individualBet(investment, individualImpliedOdds, combinedMarketMargin):
     return (investment * individualImpliedOdds) / combinedMarketMargin
 
-# Keep the API key secret
-api_key = open('api_key.txt').read()
 
-# First get a list of in-season sports
-sports_response = requests.get('https://api.the-odds-api.com/v3/sports', params={'api_key': api_key})
-sports_json = json.loads(sports_response.text)
-sports_keys = [dictionary['key'] for dictionary in sports_json['data']]  # all the currently available sports
-
-# Now get the odds for each event in each sport for each agency
-
-
-
+# Now get the odds for each event in each sport for each agency. 'Sport' being set to 'upcoming' means that the odds
+# for all upcoming games will be returned
+odds_response = requests.get('https://api.the-odds-api.com/v3/odds', params={
+    'api_key': api_key,
+    'sport': 'upcoming',
+    'region': 'au', # uk | us | eu | au
+    'mkt': 'h2h' # h2h | spreads | totals
+})
+odds_json = json.loads(odds_response.text)
+for game in odds_json['data']:
+    sport_key = game['sport_key']
+    teamA, teamB = game['teams']
+    for site in game['sites']:
+        bettingAgency = site['site_key']
+        oddsA, oddsB = site['odds']['h2h']
+        gameObjects.append(Game(bettingAgency=bettingAgency, teamA=teamA, teamB = teamB, oddsA=oddsA, oddsB=oddsB))
