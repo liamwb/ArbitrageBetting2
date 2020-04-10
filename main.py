@@ -10,9 +10,10 @@ import requests
 # Keep the key for the-odds-api key secret
 api_key = open('api_key.txt').read()
 gameObjects = []
+arbitrageObjects = []
 
 
-# These classes and functions are from the original ArbitrageBetting project, with some changes to better suit
+# Some classes and functions are from the original ArbitrageBetting project, with some changes to better suit
 # the API we're using
 class Game:
     def __init__(self, bettingAgency, teamA, teamB, oddsA, oddsB, ):
@@ -24,6 +25,34 @@ class Game:
         self.impliedOddsA = 1 / oddsA
         self.impliedOddsB = 1 / oddsB
         self.gameID = teamA + ' vs ' + teamB
+
+
+class PossibleArbitrage:
+    def __init__(self, teamA, teamB, oddsA, oddsB, agencyA, agencyB):
+        self.teamA = teamA
+        self.teamB = teamB
+        self.oddsA = oddsA
+        self.oddsB = oddsB
+        self.agencyA = agencyA
+        self.agencyB = agencyB
+        self.CMM = combinedMarketMargin(oddsA, oddsB)
+
+def createPossibleArbitrages(game_object_1, game_object_2):
+    # the teamA and teamB for the two game objects should be the same
+    agency1 = game_object_1.bettingAgency
+    agency2 = game_object_2.bettingAgency
+    teamA = game_object_1.teamA
+    teamB = game_object_1.teamB
+    odds1 = [game_object_1.oddsA, game_object_1.oddsB]
+    odds2 = [game_object_2.oddsA, game_object_2.oddsB]
+    # append A to B
+    arbitrageObjects.append(PossibleArbitrage(teamA=teamA, teamB=teamB,
+                                              oddsA=odds1[0]), oddsB=odds2[1],
+                            agencyA=agency1, agencyB=agency2)
+    # append B to A
+    arbitrageObjects.append(PossibleArbitrage(teamA=teamA, teamB=teamB,
+                                              oddsA=odds1[1]), oddsB=odds2[0],
+                            agencyA=agency2, agencyB=agency1)
 
 
 # the combined market margin is the sum of the two implied probabilites.
@@ -62,4 +91,10 @@ for game in odds_json['data']:
     for site in game['sites']:
         bettingAgency = site['site_key']
         oddsA, oddsB = site['odds']['h2h']
-        gameObjects.append(Game(bettingAgency=bettingAgency, teamA=teamA, teamB = teamB, oddsA=oddsA, oddsB=oddsB))
+        gameObjects.append(Game(bettingAgency=bettingAgency, teamA=teamA, teamB=teamB, oddsA=oddsA, oddsB=oddsB))
+# gameObjects now has an object for each set of odds for each game in it
+
+
+# now we need to find any arbitrage opportunities that might exist
+for game_object in gameObjects:
+    pass
