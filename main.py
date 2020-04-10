@@ -35,7 +35,9 @@ class PossibleArbitrage:
         self.oddsB = oddsB
         self.agencyA = agencyA
         self.agencyB = agencyB
+        self.gameID = teamA + ' vs ' + teamB
         self.CMM = combinedMarketMargin(oddsA, oddsB)
+
 
 # def createPossibleArbitrages(game_object_1, game_object_2):
 #     # the teamA and teamB for the two game objects should be the same
@@ -81,8 +83,8 @@ def individualBet(investment, individualImpliedOdds, combinedMarketMargin):
 odds_response = requests.get('https://api.the-odds-api.com/v3/odds', params={
     'api_key': api_key,
     'sport': 'upcoming',
-    'region': 'au', # uk | us | eu | au
-    'mkt': 'h2h' # h2h | spreads | totals
+    'region': 'au',  # uk | us | eu | au
+    'mkt': 'h2h'  # h2h | spreads | totals
 })
 odds_json = json.loads(odds_response.text)
 for game in odds_json['data']:
@@ -105,3 +107,24 @@ for ID in gameIDs:
             arbitrageObjects.append(PossibleArbitrage(teamA=game1.teamA, teamB=game2.teamB,
                                                       oddsA=game1.oddsA, oddsB=game2.oddsB,
                                                       agencyA=game1.bettingAgency, agencyB=game2.bettingAgency))
+
+# sort for the best arbitrage opportunities
+arbitrageObjects.sort(key=lambda x: x.CMM)
+
+# output what we've found
+for arbitrage_object in arbitrageObjects:
+    implied_oddsA = 1 / arbitrage_object.oddsA
+    implied_oddsB = 1 / arbitrage_object.oddsB
+    CMM = arbitrage_object.CMM
+    print('For ' + arbitrage_object.gameID +
+          '\na CMM of ' + str(arbitrage_object.CMM) +
+          '\ncan be achieved through ' + arbitrage_object.agencyA + ' and ' + arbitrage_object.agencyB + '.' +
+          '(' + str(arbitrage_object.oddsA) + ' to ' + str(arbitrage_object.oddsB) + ')' +
+          '\nBet ' + str(individualBet(investment=100, individualImpliedOdds=implied_oddsA,
+                                       combinedMarketMargin=CMM)) + '% on ' + arbitrage_object.teamA
+          + ', and ' + str(individualBet(investment=100, individualImpliedOdds=implied_oddsB,
+                                         combinedMarketMargin=CMM)) + '% on ' + arbitrage_object.teamB
+          + '.'
+          + '\nProfit: ' + str(profit(investment=100, combinedMarketMargin=CMM)) + '%.'
+          + '\n\n'
+          )
