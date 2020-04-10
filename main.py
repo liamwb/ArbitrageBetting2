@@ -41,24 +41,6 @@ class PossibleArbitrage:
         self.CMM = combinedMarketMargin(oddsA, oddsB)
 
 
-# def createPossibleArbitrages(game_object_1, game_object_2):
-#     # the teamA and teamB for the two game objects should be the same
-#     agency1 = game_object_1.bettingAgency
-#     agency2 = game_object_2.bettingAgency
-#     teamA = game_object_1.teamA
-#     teamB = game_object_1.teamB
-#     odds1 = [game_object_1.oddsA, game_object_1.oddsB]
-#     odds2 = [game_object_2.oddsA, game_object_2.oddsB]
-#     # append A to B
-#     arbitrageObjects.append(PossibleArbitrage(teamA=teamA, teamB=teamB,
-#                                               oddsA=odds1[0]), oddsB=odds2[1],
-#                             agencyA=agency1, agencyB=agency2)
-#     # append B to A
-#     arbitrageObjects.append(PossibleArbitrage(teamA=teamA, teamB=teamB,
-#                                               oddsA=odds2[0]), oddsB=odds1[1],
-#                             agencyA=agency2, agencyB=agency1)
-
-
 # the combined market margin is the sum of the two implied probabilites.
 # if it's < 1, then there is an arbitrage opportunity
 def combinedMarketMargin(odds1, odds2):
