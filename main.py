@@ -87,6 +87,12 @@ for game in odds_json['data']:
                                 sport=sport_key))
 # gameObjects now has an object for each set of odds for each game in it
 
+def printGames():
+    for game in gameObjects:
+        print(f'{game.teamA} vs {game.teamB} at {game.oddsA} to {game.oddsB} with {game.bettingAgency} \n')
+
+
+printGames()
 
 # now we need to find any arbitrage opportunities that might exist
 gameIDs = {ID.gameID for ID in gameObjects}
@@ -120,3 +126,4 @@ for arbitrage_object in arbitrageObjects:
           + '\nProfit: ' + str(profit(investment=100, combinedMarketMargin=CMM)) + '%.'
           + '\n\n'
           )
+
